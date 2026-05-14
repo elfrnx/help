@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>PulseScout</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/icon32.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink-900: #e9eef7;
+      --ink-700: #bfcae0;
+      --ink-500: #8b97ad;
+      --line: rgba(255,255,255,0.08);
+      --card: rgba(15, 21, 33, 0.8);
+      --primary: #6d8cff;
+      --primary-deep: #4f6fed;
+      --teal: #46d3b5;
+      --gold: #e0b35a;
+      --danger: #f07d7d;
+      --soft-blue: rgba(109,140,255,0.10);
+      --soft-teal: rgba(70,211,181,0.09);
+      --soft-gold: rgba(224,179,90,0.10);
+      --radius-xl: 16px;
+      --radius-md: 10px;
+      --shadow: 0 18px 46px rgba(2,6,23,0.55);
+      --title-font: "Segoe UI", Roboto, Arial, sans-serif;
+      --ui-font: "Inter", "Segoe UI", Tahoma, sans-serif;
+    }
+
+    :root,
+    html {
+      width: 100%;
+      min-width: 0;
+      max-width: none;
+    }
+
+    /* Cyber-glass overrides */
+    :root {
+      --primary: #87a1ff;
+      --secondary: #8e7bff;
+      --accent: #4fd0df;
+      --glass-bg: rgba(12,18,30,0.78);
+      --glass-border: rgba(255,255,255,0.08);
+      --title-font: 'Orbitron', 'Segoe UI', Roboto, Arial, sans-serif;
+      --ui-font: 'Rajdhani', 'Inter', 'Segoe UI', Tahoma, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 100%;
+      min-width: 0;
+      max-width: none;
+      min-height: 300px;
+      max-height: 600px;
+      font-family: var(--ui-font);
+      color: var(--ink-900);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      background:
+        radial-gradient(circle at top left, rgba(109,140,255,0.16), transparent 32%),
+        radial-gradient(circle at top right, rgba(79,208,223,0.10), transparent 28%),
+        linear-gradient(180deg, #0b1220 0%, #090f19 100%);
+      overflow: hidden;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 24px 24px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Light theme overrides */
+    :root[data-theme="light"] {
+      --ink-900: #0b1220;
+      --ink-700: #24324a;
+      --ink-500: #4b5f80;
+      --line: rgba(10,16,28,0.06);
+      --card: rgba(255,255,255,0.96);
+      --primary: #1f6feb;
+      --primary-deep: #174ab4;
+      --teal: #0ea57f;
+      --gold: #b67b10;
+      --danger: #b00020;
+      --soft-blue: rgba(20,40,80,0.04);
+      background: linear-gradient(180deg, #f6f8fb 0%, #eef3fb 100%);
+    }
+
+    header,
+    .tabs,
+    .panel { position: relative; z-index: 1; }
+
+    header {
+      margin: 10px 10px 8px;
+      border-radius: var(--radius-xl);
+      color: var(--ink-900);
+      padding: 16px 16px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(180deg, rgba(12,18,31,0.92), rgba(9,14,24,0.94));
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(18px);
+      animation: popIn 0.35s ease;
+      transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    header:hover {
+      border-color: rgba(109,140,255,0.18);
+      box-shadow: 0 20px 48px rgba(2,6,23,0.64);
+      transform: translateY(-1px);
+    }
+
+    .header-row {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .header-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-end;
+      flex: 0 0 auto;
+      min-width: 180px;
+    }
+
+    .title {
+      font-family: var(--title-font);
+      letter-spacing: 0.1em;
+      font-size: 16px;
+      font-weight: 900;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      line-height: 1.45;
+      color: var(--ink-500);
+      max-width: 360px;
+    }
+
+    .account-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 8px;
+      padding: 9px 12px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.03));
+      border: 1px solid rgba(255,255,255,0.09);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 10px 24px rgba(0,0,0,0.16);
+      backdrop-filter: blur(10px);
+      transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+    }
+
+    .account-chip:hover {
+      border-color: rgba(109,140,255,0.28);
+      background: linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.035));
+      transform: translateY(-1px);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 12px 26px rgba(0,0,0,0.18);
+    }
+
+    .account-avatar-wrap {
+      position: relative;
+      flex: 0 0 auto;
+    }
+
+    .account-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid rgba(255,255,255,0.16);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.16);
+      display: inline-block;
+      transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+    }
+
+    .account-avatar-wrap:hover .account-avatar {
+      transform: scale(1.03);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.22);
+    }
+
+    .account-initials {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 8px 18px rgba(0,0,0,0.16);
+      transition: transform 160ms ease, opacity 160ms ease;
+    }
+
+    .account-copy {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      line-height: 1.15;
+    }
+
+    .account-name {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--ink-900);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 200px;
+    }
+
+    .account-sub {
+      font-size: 11px;
+      color: var(--ink-500);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 200px;
+    }
+
+    #header-account-name a {
+      color: var(--ink-900) !important;
+      text-decoration: none !important;
+      transition: color 160ms ease;
+    }
+
+    #header-account-name a:hover {
+      color: #d6e0ff !important;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #ffffff 0%, #d9ddff 45%, #9ab0ff 100%);
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.45);
+      flex-shrink: 0;
+    }
+
+    header h1 {
+      font-family: var(--title-font);
+      letter-spacing: 0.2px;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .brand-sub {
+      font-size: 10px;
+      opacity: 0.88;
+      margin-top: 2px;
+      letter-spacing: 0.2px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin: 0 10px 8px;
+      background: transparent;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px 8px;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.03);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--ink-500);
+      transition: transform 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+    }
+
+    .tab-btn:hover { transform: translateY(-1px); border-color: rgba(109,140,255,0.35); color: var(--ink-900); }
+    .tab-btn.active {
+      color: var(--ink-900);
+      border-color: rgba(109,140,255,0.24);
+      background: linear-gradient(180deg, rgba(109,140,255,0.16), rgba(109,140,255,0.08));
+      box-shadow: 0 10px 22px rgba(109,140,255,0.12);
+    }
+
+    .panel {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+      margin: 0 10px 10px;
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(255,255,255,0.06);
+      background: linear-gradient(180deg, rgba(12,17,28,0.82), rgba(8,12,20,0.78));
+      box-shadow: 0 12px 26px rgba(3,6,20,0.5);
+      backdrop-filter: blur(16px);
+      animation: panelIn 0.25s ease;
+    }
+
+    .panel.active { display: flex; }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      padding: 10px;
+      background: transparent;
+      border-bottom: 1px solid rgba(255,255,255,0.02);
+    }
+
+    .toolbar input {
+      flex: 1 1 180px;
+      min-width: 0;
+      padding: 9px 12px;
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      outline: none;
+      background: rgba(255,255,255,0.02);
+      color: var(--ink-900);
+    }
+
+    .toolbar input:focus,
+    .add-profile-form input:focus,
+    #inp-cv-text:focus,
+    .profile-note:focus {
+      border-color: #8f91ff;
+      box-shadow: 0 0 0 3px rgba(104, 109, 255, 0.2);
+    }
+
+    .toolbar button {
+      padding: 8px 12px;
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: var(--radius-md);
+      background: transparent;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--ink-500);
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+
+    .toolbar select {
+      padding: 7px 10px;
+      border: 1px solid #bcc2ec;
+      border-radius: var(--radius-md);
+      background: white;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--ink-700);
+      flex: 0 0 auto;
+      max-width: 100%;
+    }
+
+    .toolbar .profile-toggle {
+      flex: 1 1 100%;
+      min-width: 0;
+      margin-left: 0 !important;
+      margin-top: 2px;
+      flex-wrap: wrap;
+    }
+
+    .btn-export-jobs {
+      background: linear-gradient(120deg, #526ef2 0%, #6d8cff 100%) !important;
+      color: white !important;
+      border-color: rgba(109,140,255,0.35) !important;
+    }
+
+    .btn-export-profiles {
+      background: linear-gradient(120deg, #6a54f0 0%, #8a73ff 100%) !important;
+      color: white !important;
+      border-color: rgba(138,115,255,0.35) !important;
+    }
+
+    .btn-danger {
+      color: var(--danger) !important;
+      border-color: rgba(240,125,125,0.28) !important;
+    }
+
+    .add-profile-form {
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .add-profile-form .row { display: flex; gap: 6px; }
+
+    .add-profile-form .row {
+      flex-wrap: wrap;
+    }
+
+    .add-profile-form input {
+      flex: 1 1 180px;
+      min-width: 0;
+      padding: 10px 12px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      font-size: 12px;
+      outline: none;
+      background: rgba(255,255,255,0.04);
+      color: var(--ink-900);
+    }
+
+    .add-profile-form input.url-input { flex: 2; }
+
+    #inp-cv-text {
+      width: 100%;
+      min-width: 0;
+      padding: 10px 12px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      font-size: 12px;
+      resize: vertical;
+      font-family: var(--ui-font);
+      outline: none;
+      background: rgba(255,255,255,0.04);
+      color: var(--ink-900);
+    }
+
+    .btn-add-profile {
+      padding: 10px 14px;
+      background: linear-gradient(90deg, rgba(79,111,237,0.95), rgba(109,140,255,0.95));
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .btn-add-profile:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 16px rgba(87, 89, 221, 0.28);
+    }
+
+    .form-hint {
+      font-size: 10px;
+      color: var(--ink-500);
+      padding: 0 2px;
+    }
+
+    .list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .list::-webkit-scrollbar { width: 8px; }
+    .list::-webkit-scrollbar-thumb { background: #afb5eb; border-radius: 999px; }
+
+    .empty-state {
+      text-align: center;
+      padding: 28px 18px;
+      color: var(--ink-500);
+      background: rgba(255,255,255,0.03);
+      border: 1px dashed rgba(255,255,255,0.07);
+      border-radius: 14px;
+    }
+
+    .empty-state .icon {
+      width:44px; height:44px; display:flex;align-items:center;justify-content:center;margin:0 auto 10px;border-radius:12px;
+      background: linear-gradient(180deg, rgba(109,140,255,0.12), rgba(255,255,255,0.03));
+      border: 1px solid rgba(109,140,255,0.12);
+    }
+    .empty-state .icon svg { width:26px;height:26px; color:var(--ink-500); stroke:currentColor; fill:none; stroke-width:1.6; }
+    .empty-state p { font-size: 12px; line-height: 1.6; color: var(--ink-500); }
+
+    .job-card,
+    .profile-card,
+    .match-card {
+      background: rgba(255,255,255,0.04);
+      border-radius: 14px;
+      padding: 12px 12px 11px;
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 8px 22px rgba(0,0,0,0.18);
+      transition: transform 0.18s ease, border-color 0.18s ease, background-color 0.18s ease;
+    }
+
+    .job-card:hover,
+    .profile-card:hover,
+    .match-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(109,140,255,0.34);
+      background: rgba(255,255,255,0.055);
+    }
+
+    .insight-panel {
+      margin: 10px 10px 0;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.035);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.14);
+    }
+
+    .insight-title {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      color: var(--ink-500);
+      margin-bottom: 8px;
+    }
+
+    .insight-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .insight-stat {
+      padding: 8px 9px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .insight-stat .value {
+      display: block;
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--ink-900);
+      margin-bottom: 3px;
+    }
+
+    .insight-stat .label {
+      font-size: 10px;
+      color: var(--ink-500);
+      line-height: 1.3;
+    }
+
+    .match-insight {
+      margin-top: 8px;
+      padding: 9px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .match-insight .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .match-insight .summary {
+      font-size: 11px;
+      color: var(--ink-700);
+      line-height: 1.55;
+    }
+
+    .message-preview {
+      width: 100%;
+      min-height: 96px;
+      margin-top: 8px;
+      padding: 8px 10px;
+      border: 1px solid #c7cdf1;
+      border-radius: 12px;
+      resize: vertical;
+      font-family: var(--ui-font);
+      font-size: 11px;
+      line-height: 1.45;
+      background: #fdfdff;
+      color: var(--ink-700);
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: auto;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 800;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .status-pill.draft {
+      color: #3b4ab6;
+      background: #eef0ff;
+      border-color: #cad0fb;
+    }
+
+    .status-pill.applied {
+      color: #0f6b46;
+      background: #e9f8f0;
+      border-color: #bfe7d2;
+    }
+
+    .status-pill.none {
+      color: var(--ink-500);
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(255,255,255,0.08);
+    }
+
+    .match-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .match-score {
+      background: rgba(224,179,90,0.12);
+      color: #f2ce86;
+      border: 1px solid rgba(224,179,90,0.2);
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .card-actions {
+      flex-wrap: wrap;
+    }
+
+    .card-actions > * {
+      max-width: 100%;
+    }
+
+    .skill-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin: 7px 0 8px;
+    }
+
+    .chip {
+      background: rgba(109,140,255,0.10);
+      color: #cdd8ff;
+      border: 1px solid rgba(109,140,255,0.16);
+      border-radius: 999px;
+      font-size: 10px;
+      padding: 2px 8px;
+    }
+
+    .job-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ink-900);
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .profile-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #96f0dd;
+      margin-bottom: 2px;
+    }
+
+    .job-company,
+    .profile-headline {
+      font-size: 12px;
+      color: var(--ink-700);
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .meta {
+      font-size: 11px;
+      color: var(--ink-500);
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 4px 0 8px;
+    }
+
+    .profile-note {
+      width: 100%;
+      padding: 7px 8px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius-md);
+      font-size: 11px;
+      font-family: var(--ui-font);
+      resize: none;
+      color: var(--ink-900);
+      margin-bottom: 6px;
+      background: rgba(255,255,255,0.04);
+    }
+
+    .card-actions { display: flex; gap: 6px; align-items: center; }
+
+    .btn-visit,
+    .btn-visit-profile {
+      font-size: 11px;
+      padding: 5px 9px;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      font-weight: 700;
+    }
+
+    .btn-visit { background: linear-gradient(120deg, #536cf2 0%, #6d8cff 100%); }
+    .btn-visit-profile { background: linear-gradient(120deg, #6d58ec 0%, #8a73ff 100%); }
+
+    .btn-save-note {
+      font-size: 11px;
+      padding: 5px 9px;
+      background: rgba(70,211,181,0.10);
+      color: #96f0dd;
+      border: 1px solid rgba(70,211,181,0.18);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .btn-save-note:hover { background: rgba(70,211,181,0.16); }
+
+    .btn-del {
+      font-size: 12px;
+      padding: 6px 10px;
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      cursor: pointer;
+      margin-left: auto;
+      font-weight: 700;
+    }
+
+    .btn-del:hover { background: rgba(240,125,125,0.08); }
+
+    .badge {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      backdrop-filter: blur(8px);
+      white-space: nowrap;
+    }
+
+
+    .mute-btn {
+      border: 1px solid rgba(255,255,255,0.08) !important;
+      background: rgba(255,255,255,0.04) !important;
+      color: var(--ink-900) !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+    }
+
+    .mute-btn:hover {
+      border-color: rgba(109,140,255,0.34) !important;
+      background: rgba(109,140,255,0.12) !important;
+    }
+
+    /* account avatar and panel */
+    #header-account { cursor: pointer; }
+    #account-panel { display:none; position: absolute; right: 18px; top: 64px; width: 320px; max-height: 320px; overflow:auto; background: linear-gradient(180deg, rgba(10,16,28,0.97), rgba(8,12,20,0.95)); color: var(--ink-900); border-radius: 16px; border:1px solid rgba(255,255,255,0.08); box-shadow: 0 18px 44px rgba(3,7,20,0.55); padding:12px; z-index:1000; backdrop-filter: blur(16px); }
+    #account-panel .acct-head { display:flex;gap:10px;align-items:center;margin-bottom:10px; }
+    #account-panel .acct-name { font-weight:800;color:var(--ink-900); }
+    #account-panel .acct-skills { display:flex;flex-wrap:wrap;gap:6px;margin-top:6px; }
+    #account-panel .acct-skill { background: rgba(109,140,255,0.10);border:1px solid rgba(109,140,255,0.14);padding:5px 8px;border-radius:999px;font-size:12px;color:var(--ink-900); }
+    #account-panel .acct-jobs { margin-top:8px; }
+    #account-panel .acct-job { display:flex;justify-content:space-between;align-items:center;padding:7px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);margin-bottom:6px;background:rgba(255,255,255,0.04); }
+
+    .lang-select {
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--ink-900);
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 999px;
+      padding: 4px 8px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .lang-select option {
+      color: #1f2b39;
+      background: #ffffff;
+    }
+
+    @keyframes popIn {
+      from { transform: translateY(-4px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes panelIn {
+      from { transform: translateY(4px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @media (max-width: 420px) {
+      .tab-btn { font-size: 11px; padding: 9px 6px; }
+      .toolbar,
+      .add-profile-form,
+      .list { padding: 8px; }
+      .toolbar input,
+      .toolbar button,
+      .toolbar .profile-toggle,
+      .add-profile-form input,
+      .btn-add-profile,
+      .btn-export-jobs,
+      .btn-export-profiles,
+      .btn-danger {
+        width: 100%;
+      }
+      .toolbar .profile-toggle {
+        justify-content: flex-start;
+      }
+      .row { flex-direction: column; }
+      .row > * { width: 100%; }
+      .insight-grid { grid-template-columns: 1fr; }
+      .card-actions { align-items: stretch; }
+      .card-actions > * { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-row">
+    <div class="header-copy">
+      <h1 class="title">PulseScout</h1>
+      <div class="subtitle" id="header-status">CV ya da LinkedIn hesabını ekleyip eşleştirmeyi başlat</div>
+      <div id="header-account" class="account-chip" role="button" aria-label="LinkedIn account" title="LinkedIn hesabı">
+        <div class="account-avatar-wrap">
+          <img id="header-account-img" class="account-avatar" src="" alt="" style="display:none;" />
+          <div id="header-account-initials" class="account-initials">PS</div>
+        </div>
+        <div class="account-copy">
+          <div class="account-name" id="header-account-name">&nbsp;</div>
+          <div class="account-sub" id="header-account-sub">&nbsp;</div>
+        </div>
+        <span id="account-match-count" class="badge" style="display:none;background:rgba(255,255,255,0.10);">0</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="badge" id="total-badge">0 uygun</span>
+    </div>
+  </div>
+</header>
+
+<div id="account-panel">
+  <div class="acct-head">
+    <img id="acct-panel-img" class="account-avatar" src="" alt="" style="width:48px;height:48px;display:none;" />
+    <div>
+      <div class="acct-name" id="acct-panel-name">Not signed in</div>
+      <div style="font-size:12px;color:var(--ink-500);" id="acct-panel-url"></div>
+    </div>
+  </div>
+  <div style="font-size:12px;color:var(--ink-700);font-weight:700;">Eşleşen Beceriler</div>
+  <div class="acct-skills" id="acct-skills"></div>
+  <div style="font-size:12px;color:var(--ink-700);font-weight:700;margin-top:8px;">Eşleşen İlanlar</div>
+  <div class="acct-jobs" id="acct-jobs"></div>
+</div>
+
+<div id="debug-output" style="display:none;padding:8px 10px;margin:8px;max-height:140px;overflow:auto;background:rgba(0,0,0,0.04);border-radius:8px;font-size:12px;color:var(--ink-700);"></div>
+
+<div class="tabs">
+  <button class="tab-btn" data-tab="jobs">İş İlanları <span id="job-count"></span></button>
+  <button class="tab-btn" data-tab="profiles">Profiller <span id="profile-count"></span></button>
+  <button class="tab-btn active" data-tab="matches">Uygun İlanlar <span id="match-count"></span></button>
+</div>
+
+<!-- PROFILE PANEL -->
+<div class="panel active" id="panel-profiles">
+  <div class="add-profile-form">
+    <div class="row">
+      <input type="text" id="inp-name" placeholder="Ad Soyad *" />
+      <input type="text" id="inp-title" placeholder="Unvan / Pozisyon" />
+    </div>
+    <div class="row">
+      <input type="url" class="url-input" id="inp-url" placeholder="LinkedIn profil linki (linkedin.com/in/...)" />
+      <button class="btn-add-profile" id="btn-add-profile">+ Ekle</button>
+    </div>
+    <div class="form-hint">* Ad Soyad zorunlu. Diğer alanlar isteğe bağlı.</div>
+  </div>
+    <div class="toolbar">
+    <input type="text" id="profile-search" placeholder="İsim veya unvan ara..." />
+    <button class="btn-export-profiles" id="btn-export-profiles">CSV</button>
+    <button class="btn-danger" id="btn-clear-profiles">Temizle</button>
+  </div>
+    <div class="list" id="profile-list">
+    <div class="empty-state">
+      <div class="icon">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 20a8 8 0 0 1 16 0" />
+        </svg>
+      </div>
+      <p>Henüz kayıtlı profil yok.<br>Yukarıdan manuel ekleyebilirsiniz.</p>
+    </div>
+    </div>
+</div>
+
+<!-- JOB PANEL -->
+<div class="panel" id="panel-jobs">
+  <div class="toolbar">
+    <input type="text" id="job-search" placeholder="İlan veya şirket ara..." />
+    <select id="job-search-mode" aria-label="Arama türü">
+      <option value="jobs">İşler</option>
+      <option value="companies">Şirketler</option>
+    </select>
+    <button class="btn-export-jobs" id="btn-save-current-job">İlanı Kaydet</button>
+    <button class="btn-export-jobs" id="btn-open-linkedin-search">LinkedIn'de Ara</button>
+    <label class="profile-toggle" id="profile-match-label" style="display:flex;align-items:center;gap:6px;margin-left:8px;">
+      <input type="checkbox" id="profile-match-toggle" />
+      <span style="font-size:12px;color:var(--ink-700);">Profil ile eşleşenleri göster</span>
+      <span class="badge" id="profile-match-count" style="display:none;">0</span>
+    </label>
+    <button class="btn-export-jobs" id="btn-export-jobs">CSV</button>
+    <button class="btn-danger" id="btn-clear-jobs">Temizle</button>
+  </div>
+    <div class="list" id="job-list">
+    <div class="empty-state">
+      <div class="icon">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M7 3h10v4H7zM5 7h14v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7zM9 11h6" />
+        </svg>
+      </div>
+      <p>Henüz kayıtlı ilan yok.<br>LinkedIn'de bir iş ilanı açıp "İlanı Kaydet" butonunu kullanın.</p>
+    </div>
+    </div>
+</div>
+
+<!-- MATCH PANEL -->
+<div class="panel active" id="panel-matches">
+  <div class="add-profile-form">
+    <div class="row">
+      <input type="text" id="inp-skills" placeholder="Beceriler (örn: JavaScript, React, SQL)" />
+    </div>
+    <div class="row">
+      <button class="btn-add-profile" id="btn-save-skills">Becerileri Kaydet</button>
+      <button class="btn-add-profile" id="btn-read-linkedin">Aktif LinkedIn Profilinden Çek</button>
+      <button class="btn-add-profile" id="btn-sync-linkedin">Hesaptan Senkronize Et</button>
+    </div>
+    <div class="row">
+      <textarea id="inp-cv-text" rows="4" placeholder="CV metnini buraya yapıştır..."></textarea>
+    </div>
+    <div class="row" style="align-items:center;gap:8px;">
+      <input type="file" id="cv-file-input" accept=".txt" />
+      <div class="form-hint" style="font-size:11px;">Desteklenen: .txt (PDF/DOCX desteği yakında)</div>
+    </div>
+    <div class="row">
+      <button class="btn-add-profile" id="btn-parse-cv">CV Metninden Becerileri Çıkar</button>
+    </div>
+    <div class="form-hint" id="skill-source-hint">Henüz aday profili oluşturulmadı.</div>
+  </div>
+  <div class="insight-panel" id="match-insights">
+    <div class="insight-title" id="insight-panel-title">AI insights</div>
+    <div class="insight-grid">
+      <div class="insight-stat"><span class="value" id="insight-match-count">0</span><span class="label" id="insight-match-label">Eşleşen ilan</span></div>
+      <div class="insight-stat"><span class="value" id="insight-average-score">0%</span><span class="label" id="insight-average-label">Ortalama uyum</span></div>
+      <div class="insight-stat"><span class="value" id="insight-recommendation">-</span><span class="label" id="insight-recommendation-label">Öneri</span></div>
+    </div>
+  </div>
+  <div class="toolbar">
+    <input type="text" id="match-search" placeholder="Pozisyon/şirket/skill filtrele..." />
+    <button class="btn-export-jobs" id="btn-export-matches">CSV</button>
+    <button class="btn-danger" id="btn-clear-skills">Temizle</button>
+  </div>
+  <div class="list" id="match-list">
+    <div class="empty-state">
+      <div class="icon">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M12 20c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8zM12 8v4l3 3" />
+        </svg>
+      </div>
+      <p>Önce bir CV ya da LinkedIn hesabı ekleyin.<br>Becerileri çıkardıktan sonra eşleşen ilanları görüntüleyeceğim.</p>
+    </div>
+  </div>
+
+    <!-- Job detail modal (shown inside popup) -->
+    <div id="job-modal" style="display:none;position:fixed;inset:12% 6%;background:linear-gradient(180deg,rgba(10,16,28,0.98),rgba(8,12,20,0.96));border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,0.56);z-index:9999;padding:14px;overflow:auto;border:1px solid rgba(255,255,255,0.08);backdrop-filter:blur(18px);">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+        <div>
+          <div id="job-modal-title" style="font-weight:800;color:var(--ink-900);font-size:14px;margin-bottom:6px;">Title</div>
+          <div id="job-modal-company" style="font-size:12px;color:var(--ink-700);margin-bottom:6px;">Company</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button id="job-modal-save" class="btn-add-profile">Kaydet</button>
+          <button id="job-modal-open" class="btn-visit">LinkedIn'de Aç</button>
+          <button id="job-modal-close" class="btn-del">Kapat</button>
+        </div>
+      </div>
+      <div id="job-modal-meta" style="font-size:11px;color:var(--ink-500);margin-top:8px;"></div>
+      <div id="job-modal-desc" style="margin-top:10px;font-size:12px;color:var(--ink-700);white-space:pre-wrap;"></div>
+    </div>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
